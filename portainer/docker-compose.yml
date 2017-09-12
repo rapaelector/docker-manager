@@ -1,0 +1,105 @@
+version: "2"
+
+services:
+  elasticsearch:
+    build: ./docker_package/elasticsearch/
+    container_name: main_es
+    restart: always
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      # disable X-Pack
+      # see https://www.elastic.co/guide/en/x-pack/current/xpack-settings.html
+      #     https://www.elastic.co/guide/en/x-pack/current/installing-xpack.html#xpack-enabling
+      xpack.security.enabled: "false"
+      xpack.monitoring.enabled: "false"
+      xpack.graph.enabled: "false"
+      xpack.watcher.enabled: "false"
+    labels:
+      - 'traefik.backend=elastica'
+      - 'traefik.port=9200'
+      - 'traefik.frontend.rule=Host:elastica.develop.eu'
+      - 'traefik.frontend.port=9200'
+    networks:
+      vpcbr:
+        ipv4_address: 11.88.0.32
+
+  mail:
+    image: mailhog/mailhog
+    container_name: main_mh 
+    restart: always
+    labels:
+      - 'traefik.backend=mailhog'
+      - 'traefik.port=8025'
+      - 'traefik.frontend.rule=Host:mailhog.develop.eu'
+    #env_file: ./env/common.env
+    networks:
+      vpcbr:
+        ipv4_address: 11.88.0.16
+
+  logstash:
+    build: ./docker_package/logstash/
+    container_name: main_ls
+    restart: always
+    volumes:
+      - ./docker_package/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./docker_package/logstash/pipeline:/usr/share/logstash/pipeline
+    depends_on:
+      - elasticsearch
+    networks:
+      vpcbr:
+        ipv4_address: 11.88.0.8
+
+  kibana:
+    build: ./docker_package/kibana/
+    container_name: main_kb
+    restart: always
+    volumes:
+      - ./docker_package/kibana/config/:/usr/share/kibana/config
+    labels:
+      - 'traefik.backend=kibana'
+      - 'traefik.port=5601'
+      - 'traefik.frontend.rule=Host:kibana.develop.eu'
+    depends_on:
+      - elasticsearch
+    networks:
+      vpcbr:
+        ipv4_address: 11.88.0.4
+
+  portainer:
+    container_name: main_portainer
+    image: portainer/portainer
+    restart: always
+    command: --no-auth
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - 'traefik.backend=portainer'
+      - 'traefik.port=9000'
+      - 'traefik.frontend.rule=Host:portainer.develop.eu'
+    networks:
+      vpcbr:
+        ipv4_address: 11.88.0.3
+
+  traefik:
+    container_name: main_traefik
+    image: traefik
+    restart: always
+    command: -c /dev/null --web --docker --logLevel=INFO
+    ports:
+      - '80:80'
+      - '8080:8080'
+    volumes:
+      - ./docker_package/traefik/certs:/certs/
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      vpcbr:
+        ipv4_address: 11.88.0.2
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 11.88.0.0/16
+          gateway: 11.88.0.1
+
