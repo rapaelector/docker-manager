@@ -20,7 +20,7 @@ services:
       - 'traefik.frontend.rule=Host:elastica.develop.eu'
       - 'traefik.frontend.port=9200'
     networks:
-      vpcbr:
+      main_vpcbr:
         ipv4_address: 11.88.0.32
 
   mail:
@@ -33,7 +33,7 @@ services:
       - 'traefik.frontend.rule=Host:mailhog.develop.eu'
     #env_file: ./env/common.env
     networks:
-      vpcbr:
+      main_vpcbr:
         ipv4_address: 11.88.0.16
 
   logstash:
@@ -46,7 +46,7 @@ services:
     depends_on:
       - elasticsearch
     networks:
-      vpcbr:
+      main_vpcbr:
         ipv4_address: 11.88.0.8
 
   kibana:
@@ -62,7 +62,7 @@ services:
     depends_on:
       - elasticsearch
     networks:
-      vpcbr:
+      main_vpcbr:
         ipv4_address: 11.88.0.4
 
   portainer:
@@ -77,7 +77,7 @@ services:
       - 'traefik.port=9000'
       - 'traefik.frontend.rule=Host:portainer.develop.eu'
     networks:
-      vpcbr:
+      main_vpcbr:
         ipv4_address: 11.88.0.3
 
   traefik:
@@ -92,11 +92,11 @@ services:
       - ./docker_package/traefik/certs:/certs/
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      vpcbr:
+      main_vpcbr:
         ipv4_address: 11.88.0.2
 
 networks:
-  vpcbr:
+  main_vpcbr:
     driver: bridge
     ipam:
       config:
