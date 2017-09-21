@@ -40,6 +40,9 @@ services:
     build: ./docker_package/logstash/
     container_name: main_ls
     restart: always
+    ports:
+      - '5002:5002'
+      - '5008:5008'
     volumes:
       - ./docker_package/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./docker_package/logstash/pipeline:/usr/share/logstash/pipeline
