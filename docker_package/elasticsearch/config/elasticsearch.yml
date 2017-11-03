@@ -1,0 +1,14 @@
+xpack.notification.slack:
+  account:
+    monitoring:
+      url: https://hooks.slack.com/services/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
+      message_defaults:
+        from: watcher
+        to: notifications
+        attachment:
+          fallback: "X-Pack Notification"
+          color: "#36a64f"
+          title: "X-Pack Notification"
+          title_link: "https://www.elastic.co/guide/en/x-pack/current/index.html"
+          text: "One of your watches generated this notification."
+          mrkdwn_in: "pretext, text"

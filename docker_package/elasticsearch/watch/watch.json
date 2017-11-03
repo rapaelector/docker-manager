@@ -1,0 +1,74 @@
+{
+  "trigger": {
+    "schedule": {
+      "interval": "5m"
+    }
+  },
+  "input": {
+    "search": {
+      "request": {
+        "indices": [
+          "bp-error"
+        ],
+        "body": {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "query_string": {
+                    "query": "400 OR 500"
+                  }
+                },
+                {
+                  "range": {
+                    "@timestamp": {
+                      "gte": "now-5m"
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "_source": [
+            "@fields.level"
+          ],
+          "sort": [
+            {
+              "@timestamp": {
+                "order": "desc"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "condition": {
+    "compare": {
+      "ctx.payload.hits.total": {
+        "gt": 1
+      }
+    }
+  },
+  "throttle_period": "15m",
+  "actions": {
+    "notify-slack" : {
+      "throttle_period" : "5m",
+      "slack" : {
+        "account" : "blubirdteam",
+        "message" : {
+          "from" : "bp-watcher",
+          "to" : [ "#bp-alert", "@derek" ],
+          "text" : "BP System Monitoring",
+          "attachments" : [
+            {
+              "title" : "Errors Found",
+              "text" : "Encountered  {{ctx.payload.hits.total}} errors in the last 5 minutes (facepalm)",
+              "color" : "danger"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

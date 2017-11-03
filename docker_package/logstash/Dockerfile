@@ -7,3 +7,4 @@ RUN logstash-plugin install logstash-filter-json
 RUN logstash-plugin install logstash-filter-grok
 RUN logstash-plugin install logstash-filter-mutate
 RUN logstash-plugin install logstash-filter-ruby
+RUN logstash-plugin install x-pack
