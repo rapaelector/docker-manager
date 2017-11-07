@@ -1,2 +1,2 @@
 # https://github.com/elastic/kibana-docker
-FROM docker.elastic.co/kibana/kibana:5.6.1
+FROM docker.elastic.co/kibana/kibana:5.6.3

@@ -1,0 +1,10 @@
+name: Brand Partners Error Notifier
+type: any
+index: bp-error
+alert:
+#- "slack"
+- "email"
+#slack:
+#slack_webhook_url: "https://hooks.slack.com/services/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"
+#slack_username_override: "ElastAlert-BP"
+email: "dev-bp@blubird.eu"

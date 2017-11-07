@@ -1,6 +1,20 @@
 version: "2"
 
 services:
+  elastalert:
+    image: ivankrizsan/elastalert:latest
+    container_name: main_alert
+    restart: always
+    volumes:
+      - ./docker_package/elastalert/rules:/opt/rules
+    environment:
+      CONTAINER_TIMEZONE: "Europe/Paris"
+      SET_CONTAINER_TIMEZONE: "true"
+      ELASTICSEARCH_HOST: main_es
+    networks:
+      main_vpcbr:
+        ipv4_address: 11.88.0.64
+
   elasticsearch:
     build: ./docker_package/elasticsearch/
     container_name: main_es
@@ -40,9 +54,6 @@ services:
     build: ./docker_package/logstash/
     container_name: main_ls
     restart: always
-    ports:
-      - '5002:5002'
-      - '5008:5008'
     volumes:
       - ./docker_package/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./docker_package/logstash/pipeline:/usr/share/logstash/pipeline
