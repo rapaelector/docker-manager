@@ -51,3 +51,6 @@ sudo useradd elastalert
 sudo service elastalert status
 sudo service elastalert start
 ```
+
+## Running on Production
+Only one thing to change: Remove --debug from init.d script (no alerts are sent while this is on)
