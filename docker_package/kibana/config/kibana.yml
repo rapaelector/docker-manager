@@ -14,3 +14,4 @@ xpack.security.enabled: false
 xpack.monitoring.enabled: false
 xpack.graph.enabled: false
 xpack.reporting.enabled: false
+elastalert.serverHost: main_alert
