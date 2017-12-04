@@ -4,7 +4,6 @@ services:
   elastalert:
     image: ivankrizsan/elastalert:latest
     container_name: main_alert
-    restart: always
     volumes:
       - ./docker_package/elastalert/rules:/opt/rules
     environment:
@@ -18,7 +17,6 @@ services:
   elasticsearch:
     build: ./docker_package/elasticsearch/
     container_name: main_es
-    restart: always
     environment:
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       # disable X-Pack
@@ -40,7 +38,6 @@ services:
   mail:
     image: mailhog/mailhog
     container_name: main_mh 
-    restart: always
     labels:
       - 'traefik.backend=mailhog'
       - 'traefik.port=8025'
@@ -53,7 +50,6 @@ services:
   logstash:
     build: ./docker_package/logstash/
     container_name: main_ls
-    restart: always
     volumes:
       - ./docker_package/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./docker_package/logstash/pipeline:/usr/share/logstash/pipeline
@@ -66,7 +62,6 @@ services:
   kibana:
     build: ./docker_package/kibana/
     container_name: main_kb
-    restart: always
     volumes:
       - ./docker_package/kibana/config/:/usr/share/kibana/config
     labels:
