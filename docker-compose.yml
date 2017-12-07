@@ -34,6 +34,8 @@ services:
     networks:
       main_vpcbr:
         ipv4_address: 11.88.0.32
+        aliases:
+          - elastica.develop.eu
 
   mail:
     image: mailhog/mailhog
@@ -46,6 +48,8 @@ services:
     networks:
       main_vpcbr:
         ipv4_address: 11.88.0.16
+        aliases:
+          - mailhog.develop.eu
 
   logstash:
     build: ./docker_package/logstash/
@@ -59,6 +63,8 @@ services:
     networks:
       main_vpcbr:
         ipv4_address: 11.88.0.8
+        aliases:
+          - logstash.develop.eu
 
   kibana:
     build: ./docker_package/kibana/
