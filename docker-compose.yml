@@ -55,6 +55,7 @@ services:
       - ./docker_package/logstash/pipeline:/usr/share/logstash/pipeline
     depends_on:
       - elasticsearch
+    restart: on-failure
     networks:
       main_vpcbr:
         ipv4_address: 11.88.0.8
