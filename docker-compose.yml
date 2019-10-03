@@ -108,7 +108,7 @@ services:
 
   traefik:
     container_name: main_traefik
-    image: traefik
+    image: 'traefik:v1.7.18-alpine'
     restart: always
     command: -c /dev/null --web --docker --logLevel=INFO
     ports:
