@@ -1,14 +1,14 @@
 version: "2"
 
 services:
-  mysql:
-    image: mysql:5.7
-    container_name: main_mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=123123123
-    networks:
-      main_vpcbr:
-        ipv4_address: 11.88.0.128
+  # mysql:
+  #   image: mysql:5.7
+  #   container_name: main_mysql
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=123123123
+  #   networks:
+  #     main_vpcbr:
+  #       ipv4_address: 11.88.0.128
 
 #  elastalert:
 #    image: ivankrizsan/elastalert:latest
