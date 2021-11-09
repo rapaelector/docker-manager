@@ -1,95 +1,24 @@
-version: "2"
+version: "3.7"
 
 services:
-  # mysql:
-  #   image: mysql:5.7
-  #   container_name: main_mysql
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=123123123
-  #   networks:
-  #     main_vpcbr:
-  #       ipv4_address: 11.88.0.128
-
-#  elastalert:
-#    image: ivankrizsan/elastalert:latest
-#    container_name: main_alert
-#    volumes:
-#      - ./docker_package/elastalert/rules:/opt/rules
-#    environment:
-#      CONTAINER_TIMEZONE: "Europe/Paris"
-#      SET_CONTAINER_TIMEZONE: "true"
-#      ELASTICSEARCH_HOST: main_es
-#    networks:
-#      main_vpcbr:
-#        ipv4_address: 11.88.0.64
-#
-#  elasticsearch:
-#    build: ./docker_package/elasticsearch/
-#    container_name: main_es
-#    environment:
-#      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-#      # disable X-Pack
-#      # see https://www.elastic.co/guide/en/x-pack/current/xpack-settings.html
-#      #     https://www.elastic.co/guide/en/x-pack/current/installing-xpack.html#xpack-enabling
-#      xpack.security.enabled: "false"
-#      xpack.monitoring.enabled: "false"
-#      xpack.graph.enabled: "false"
-#      xpack.watcher.enabled: "false"
-#    labels:
-#      - 'traefik.backend=elastica'
-#      - 'traefik.port=9200'
-#      - 'traefik.frontend.rule=Host:elastica.develop.eu'
-#      - 'traefik.frontend.port=9200'
-#    networks:
-#      main_vpcbr:
-#        ipv4_address: 11.88.0.32
-#        aliases:
-#          - elastica.develop.eu
 
   mail:
     image: mailhog/mailhog
-    container_name: main_mh 
+    container_name: main_mh
     restart: always
     labels:
-      - 'traefik.backend=mailhog'
-      - 'traefik.port=8025'
-      - 'traefik.frontend.rule=Host:mailhog.develop.eu'
+      - "traefik.enable=true"
+      - "traefik.docker.network=main_vpcbr"
+      - "traefik.http.routers.mail.entrypoints=web"
+      - "traefik.http.routers.mail.rule=Host(`mailhog.develop.eu`)"
+      - "traefik.http.routers.mail.service=mail"
+      - "traefik.http.services.mail.loadbalancer.server.port=8025"
     #env_file: ./env/common.env
     networks:
       main_vpcbr:
         ipv4_address: 11.88.0.16
         aliases:
           - mailhog.develop.eu
-
-#  logstash:
-#    build: ./docker_package/logstash/
-#    container_name: main_ls
-#    volumes:
-#      - ./docker_package/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-#      - ./docker_package/logstash/pipeline:/usr/share/logstash/pipeline
-#    depends_on:
-#      - elasticsearch
-#    restart: on-failure
-#    networks:
-#      main_vpcbr:
-#        ipv4_address: 11.88.0.8
-#        aliases:
-#          - logstash.develop.eu
-#
-#  kibana:
-#    build: ./docker_package/kibana/
-#    container_name: main_kb
-#    volumes:
-#      - ./docker_package/kibana/config/:/usr/share/kibana/config
-#    labels:
-#      - 'traefik.backend=kibana'
-#      - 'traefik.port=5601'
-#      - 'traefik.frontend.rule=Host:kibana.develop.eu'
-#    depends_on:
-#      - elasticsearch
-#    networks:
-#      main_vpcbr:
-#        ipv4_address: 11.88.0.4
 
   portainer:
     container_name: main_portainer
@@ -99,24 +28,46 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - 'traefik.backend=portainer'
-      - 'traefik.port=9000'
-      - 'traefik.frontend.rule=Host:portainer.develop.eu'
+      - "traefik.enable=true"
+      - "traefik.docker.network=main_vpcbr"
+      - "traefik.http.routers.portainer.entrypoints=web"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.develop.eu`)"
     networks:
       main_vpcbr:
         ipv4_address: 11.88.0.3
 
   traefik:
     container_name: main_traefik
-    image: 'traefik:v1.7.18-alpine'
+    image: 'traefik:v2.4'
     restart: always
-    command: -c /dev/null --web --docker --logLevel=INFO
+    # command: -c /dev/null --web --docker --logLevel=INFO
+    security_opt:
+      - no-new-privileges:true
     ports:
       - '80:80'
+      - '443:443'
       - '8080:8080'
     volumes:
-      - ./docker_package/traefik/certs:/certs/
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker_package/traefik/traefik.yml:/traefik.yml:ro
+      - ./docker_package/traefik/acme.json:/acme.json
+      - ./docker_package/traefik/acme-dns:/acme-dns
+       # Add folder with dynamic configuration yml
+      - ./docker_package/traefik/configurations:/configurations
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=main_vpcbr"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.develop.eu`)"
+      - "traefik.http.routers.traefik.middlewares=user-auth@file"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.tls.certresolver=le-dns"
+      - "traefik.http.routers.traefik.tls.domains[0].main=develop.eu"
+      - "traefik.http.routers.traefik.tls.domains[0].sans=*.develop.eu"
+    environment:
+      - ACME_DNS_API_BASE=https://auth.acme-dns.io
+      - ACME_DNS_STORAGE_PATH=/acme-dns
     networks:
       main_vpcbr:
         ipv4_address: 11.88.0.2
